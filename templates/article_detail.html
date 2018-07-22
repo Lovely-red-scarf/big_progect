@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+    <div class="article_info">
+        <h4 class="text-center">{{ article_obj.title }}</h4>
+        <div class="content">
+            {{ article_obj.content|safe }}
+
+        </div>
+
+
+        <div class="clearfix">
+            <div id="div_digg">
+                <div class="diggit action">
+                    <span class="diggnum" id="digg_count">{{ article_obj.up_count }}</span>
+                </div>
+                <div class="buryit action">
+                    <span class="burynum" id="bury_count">{{ article_obj.down_count }}</span>
+                </div>
+                <div class="clear"></div>
+
+            </div>
+
+        </div>
+        <div class="diggword pull-right" id="digg_tips"></div>
+
+
+
+        <div class="comment">
+            <p>评论列表</p>
+            <hr/>
+            <ul class="comment_list list-group">
+                {% for comment in comment_list %}
+                <li class="list-group-item">
+                   <div>
+                       <a href="">#{{ forloop.counter }}楼</a>&nbsp;&nbsp;
+                       <span class="small">{{ comment.create_time|date:"Y-m-d H:i" }}</span>&nbsp;&nbsp;
+                       <a href="">{{ comment.user.username }}</a>
+                       <a href="javascript:void(0)" class="pull-right reply_btn" username="{{ comment.user.username }}" comment_id="{{ comment.pk }}"><span>回复</span></a>
+
+                   </div>
+                    {% if comment.parent_comment_id %}
+                    <div class="parent_comment_info well">
+                         <p>
+                             {{ comment.parent_comment.user }}: {{ comment.parent_comment.content }}
+                         </p>
+                    </div>
+                    {% endif %}
+                   <div>
+                       <p>{{ comment.content }}</p>
+                   </div>
+                </li>
+                {% endfor %}
+
+            </ul>
+            <p>发表评论</p>
+            <p>昵称：<input type="text" id="tbCommentAuthor" class="author" disabled="disabled" size="50" value="{{ request.user.username }}"></p>
+            <div>
+                <textarea name="" id="comment_content" cols="60" rows="10"></textarea>
+            </div>
+            <input type="button" value="submit" class="btn btn-default comment_btn">
+        </div>
+
+
+
+
+    {% csrf_token %}
+    <script>
+
+            当你点赞的时候你要知道是哪个人对哪篇文章进行了什么操作
+        $(".action").click(function () {
+
+            上面是获取点赞这个动作的操作 得到就是True 发送后台 告诉后台 True是点赞False是踩
+            if ("{{ request.user.username }}") {
+                var is_up = $(this).hasClass('diggit');
+                var _this = $(this).children('span');
+                           如果登陆成功了才可以进行操作
+                $.ajax({
+                    url: "/praise/",
+                    type: 'post',
+                    data: {
+                        is_up: is_up,
+                        article_id: '{{ article_obj.pk }}',
+                        csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val(),
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        if (data.state) {
+                                点赞的操作
+                            var val = _this.text();
+                            _this.text(parseInt(val) + 1);
+                                parseInt这个可以直接对前端中的你获取的字段进行渐渐相当于  orm的F函数
+                        } else {
+                            if (data.handled) {
+                                    提交过点赞
+                                $('#digg_tips').text('您已经推荐过')
+
+                            } else {
+                                $('#digg_tips').text('您已经反对过')
+                            }
+
+                            setTimeout(function () {
+                                $('#digg_tips').text('')
+                            }, 1000)
+                        }
+                    }
+                })
+            } else {
+                location.href = '/login/'
+            }
+        })
+
+
+        评论也是类似于  点赞  你要得到那个人对那个文章评论的内容
+        var pid = '';
+        定义一个空的变量传送过去用来接收数据库内容 你的父级别是有内容还是无内容 有内容就是儿子评论
+        $('.comment_btn').click(function(){
+            var content = $('#comment_content').val();
+
+            if(pid){
+                也就是是跟评论的时候
+                var index = content.indexOf('\n');    {#      indexOf是通过元素获取下标
+                content = content.slice(index+1)  //这个是提取截断的意思  也就是提取  换行符 就是第二行的内容
+                //因为回复框其实是
+                // @alex\n
+                // 123
+                //这样的  我们要提取回复的内容 就要把人名去掉只要回复内容
+
+
+            }
+            $.ajax({
+                url:'/comment/',
+                type:'post',
+                data:{
+                    content:content,
+                    article_id :'{{ article_obj.pk }}',
+                    pid :pid,
+                    csrfmiddlewaretoken:$("[name='csrfmiddlewaretoken']").val()
+                },
+                success:function(data){
+                    console.log(data);
+
+                    var comment_time = data.timer;
+                    var comment_content = data.content;
+                    var comment_user = data.user;
+
+                    var $li = `<li class="list-group-item">
+                            <div>
+                            <span class="small">${comment_time}</span>&nbsp;&nbsp;
+                            <a>${comment_user }</a>
+                            </div>
+                            <div><p>${ comment_content }</p></div>
+                    </li>`;
+
+                            $(".comment_list").append($li);
+
+
+                             // 清空
+                            $("#comment_content").val("")
+                }
+            })
+        })
+
+
+        回复按钮事件
+    $('.reply_btn').click(function(){
+        $('#comment_content').focus();  //聚焦  点击回复按钮跳转到回复框
+        var val = "@"+$(this).attr('username')+'\n';
+        $('#comment_content').val(val);  //把你获取的值给设置进去
+        pid = $(this).attr('comment_id');  //获取你回复的id看看是回复谁
+        pid=''  //然后重新把pid设置为空 防止你再此评论的时候出错
+
+
+    })
+
+
+
+    </script>
+
+
+
+
+
+
+
+ </div>
+
+{% endblock %}
+
+
+

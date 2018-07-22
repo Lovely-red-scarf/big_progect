@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+    <div class="article_list">
+                {% for article in article_list %}
+                    <div class="article_item">
+                        <h5 class="text-center "><a href="/{{ username }}/article/{{ article.pk }}">{{ article.title }}</a></h5>
+                    </div>
+                    <div class="article_content">
+                        <span class="author_img">
+                            <a href=""><img src="" alt="">头像</a>
+                        </span>
+
+                        <span class=" desc media-right">
+                            {{ article.desc }}
+                        </span>
+
+                    </div>
+
+     {#   #}
+                    <div class="pull-right">
+                    {#  显示在文章底部 #}
+
+                       &nbsp;&nbsp; <span><a href="">{{ article.user.username }}</a></span>  &nbsp;&nbsp;
+                    发布于 <span>{{ article.create_time|date:'Y-m-d H:i' }}</span> &nbsp;&nbsp;
+                    <span class="glyphicon glyphicon-comment"><a href="">评论</a></span>&nbsp;&nbsp;
+                    <span  class="glyphicon glyphicon-thumbs-up"><a href="">点赞</a></span>
+
+                    </div>
+                    <div class="hk">
+                    {#   这个是为了垫一下  让文章显示别太紧密  #}
+                    </div>
+                {% endfor %}
+
+    </div>
+
+
+
+
+{% endblock %}

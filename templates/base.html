@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+        <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+        <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet">
+        <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.js"></script>
+        <link rel="stylesheet" href="/static/css/article_detail.css">
+{#            <link rel="stylesheet" href="/static/css/theme/{{  }}">#}
+    <link rel="icon" href="//www.jd.com/favicon.ico" mce_href="//www.jd.com/favicon.ico" type="image/x-icon">
+    <style>
+        .top{
+            width:100%;
+            height:150px;
+            background-color: #46b8da;
+           font-size: 20px;
+        }
+
+        .container-fluid{
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="top">
+    <p class="title">{{ blog.title }}</p>
+</div>
+
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+
+{#            {% load my_tags %}#}
+{#            {% get_query_data username %}#}
+            {% load my_tags %}
+
+           {% get_query_data username %}
+
+        </div>
+
+        <div class="col-md-9">
+{#            中间的部分#}
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
